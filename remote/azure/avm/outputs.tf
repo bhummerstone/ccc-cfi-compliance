@@ -10,7 +10,7 @@ output "storage_account" {
     resource_id       = module.storage_account.resource_id
     fqdn              = module.storage_account.fqdn
     containers        = module.storage_account.containers
-    default_container = module.storage_account.default_container
+    default_container = local.default_container
   }
 }
 
@@ -26,7 +26,7 @@ output "key_vault" {
 output "log_analytics_workspace" {
   description = "Deployed Log Analytics workspace details."
   value = {
-    name        = module.log_analytics_workspace.name
+    name        = local.log_analytics_name
     resource_id = module.log_analytics_workspace.resource_id
   }
 }
@@ -36,9 +36,9 @@ output "virtual_network" {
   value = {
     name                         = module.virtual_network.name
     resource_id                  = module.virtual_network.resource_id
-    functions_subnet_resource_id = module.virtual_network.functions_subnet_resource_id
-    vm_subnet_resource_id        = module.virtual_network.vm_subnet_resource_id
-    pe_subnet_resource_id        = module.virtual_network.pe_subnet_resource_id
+    functions_subnet_resource_id = module.virtual_network.subnets["functions"].resource_id
+    vm_subnet_resource_id        = module.virtual_network.subnets["vm"].resource_id
+    pe_subnet_resource_id        = module.virtual_network.subnets["pe"].resource_id
   }
 }
 
@@ -46,7 +46,7 @@ output "serverless_function" {
   description = "Deployed serverless function app details."
   value = {
     name        = module.serverless_function.name
-    resource_id = module.serverless_function.resource_id
+    resource_id = nonsensitive(module.serverless_function.resource_id)
   }
 }
 
@@ -54,6 +54,6 @@ output "virtual_machine" {
   description = "Deployed virtual machine details."
   value = {
     name        = module.virtual_machine.name
-    resource_id = module.virtual_machine.resource_id
+    resource_id = nonsensitive(module.virtual_machine.resource_id)
   }
 }
