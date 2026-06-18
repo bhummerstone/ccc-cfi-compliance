@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-virtual-machine-core-cn05-trusted-launch",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - Virtual machines must enable Trusted Launch (Secure Boot and vTPM)",
+    "description": "Audits virtual machines that do not have Secure Boot and vTPM enabled, the Trusted Launch features that protect against boot-level tampering and enable attestation. Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM virtual-machine sample settings 'secure_boot_enabled = true' and 'vtpm_enabled = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "virtual-machine.tfvars",
+      "avm_module": "Azure/avm-res-compute-virtualmachine/azurerm",
+      "source": "azure-policy-ccc mapping ccc-vm.yaml (CCC.Core.CN05)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings.secureBootEnabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings.vTpmEnabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

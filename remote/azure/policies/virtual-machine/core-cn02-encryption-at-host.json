@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-virtual-machine-core-cn02-encryption-at-host",
+  "properties": {
+    "displayName": "CCC.Core.CN02 - Virtual machines must have encryption at host enabled",
+    "description": "Audits virtual machines that do not have encryption at host enabled, ensuring temp disks and OS/data disk caches are encrypted. Maps to FINOS CCC Core CN02 (Encrypt Data for Storage) and enforces the AVM virtual-machine sample setting 'encryption_at_host_enabled = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.Core.CN02",
+      "ccc_title": "Encrypt Data for Storage",
+      "avm_sample": "virtual-machine.tfvars",
+      "avm_module": "Azure/avm-res-compute-virtualmachine/azurerm",
+      "source": "azure-policy-ccc mapping ccc-vm.yaml (CCC.Core.CN02)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.encryptionAtHost",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

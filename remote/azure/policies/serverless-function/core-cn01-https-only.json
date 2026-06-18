@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-serverless-function-core-cn01-https-only",
+  "properties": {
+    "displayName": "CCC.Core.CN01 - Function apps must only be accessible over HTTPS",
+    "description": "Denies Azure Function apps that do not enforce HTTPS-only traffic. Maps to FINOS CCC Core CN01 (Encrypt Data for Transmission) and enforces the AVM serverless-function sample settings 'https_only = true' and 'site_config.minimum_tls_version = 1.3'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.Core.CN01",
+      "ccc_title": "Encrypt Data for Transmission",
+      "avm_sample": "serverless-function.tfvars",
+      "avm_module": "Azure/avm-res-web-site/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN01)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "Microsoft.Web/sites/httpsOnly",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

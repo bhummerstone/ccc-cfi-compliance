@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-objstor-cn05-blob-versioning-enabled",
+  "properties": {
+    "displayName": "CCC.ObjStor.CN05 - Blob versioning must be enabled on storage accounts",
+    "description": "Audits that blob versioning is enabled on storage accounts to support object recovery. Maps to FINOS CCC ObjStor CN05 (Versioning is Enabled for All Objects in the Bucket) and enforces the AVM storage-account sample setting 'blob_properties.versioning_enabled = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.ObjStor.CN05",
+      "ccc_title": "Versioning is Enabled for All Objects in the Bucket",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc/policies/storage/cn05-blob-versioning-enabled.json"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "kind",
+            "in": ["StorageV2", "BlobStorage", "BlockBlobStorage"]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/default.isVersioningEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/default.isVersioningEnabled",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

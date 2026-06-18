@@ -1,0 +1,284 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2021-06-01/policySetDefinitions/Microsoft.Authorization.json",
+  "name": "ccc-avm-initiative",
+  "properties": {
+    "displayName": "FINOS CCC - AVM In-Scope Services Guardrails",
+    "description": "Azure Policy initiative bundling the CCC guardrails for the services exercised by the AVM test samples in remote/azure/avm: Storage Account, Azure Functions (serverless), Log Analytics Workspace, Key Vault, and Virtual Machine. Each policy enforces a control-informed setting from the corresponding *.tfvars sample. Custom policyDefinitionId values use the {scope} placeholder; substitute the subscription ID or management group path where the definitions are deployed.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Regulatory Compliance",
+      "ccc_version": "DEV",
+      "ccc_component": "CCC.Core + CCC.ObjStor + CCC.SvlsComp + CCC.KeyMgmt",
+      "source": "github.com/bhummerstone/azure-policy-ccc"
+    },
+    "parameters": {
+      "allowedLocations": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Allowed locations",
+          "description": "CCC.Core.CN06 trust perimeter - the Azure regions resources may be deployed to. An empty list flags every resource as non-compliant; populate before assigning.",
+          "strongType": "location"
+        }
+      },
+      "allowedLocationsEffect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Allowed locations effect",
+          "description": "Effect for the CCC.Core.CN06 allowed-locations guardrail. Audit (report-only) by default; set Deny to block out-of-perimeter regions once the location list is confirmed."
+        }
+      },
+      "keyRotationMaximumDays": {
+        "type": "Integer",
+        "defaultValue": 365,
+        "metadata": {
+          "displayName": "Key rotation maximum days",
+          "description": "CCC.Core.CN11 - maximum number of days after key creation before rotation is required (audit only)."
+        }
+      },
+      "logRetentionDays": {
+        "type": "String",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Log retention (days)",
+          "description": "CCC.Core.CN04 - required diagnostic-log retention in days for the resource-logs audit."
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-core-cn01-secure-transfer-tls",
+        "policyDefinitionReferenceId": "storage_core_cn01_tls",
+        "groupNames": ["CCC.Core.CN01"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-core-cn02-infrastructure-encryption",
+        "policyDefinitionReferenceId": "storage_core_cn02_infra_encryption",
+        "groupNames": ["CCC.Core.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-core-cn05-network-default-deny",
+        "policyDefinitionReferenceId": "storage_core_cn05_network",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-objstor-cn02-no-public-blob-access",
+        "policyDefinitionReferenceId": "storage_objstor_cn02_no_public_blob",
+        "groupNames": ["CCC.ObjStor.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-objstor-cn02-disable-shared-key",
+        "policyDefinitionReferenceId": "storage_objstor_cn02_no_shared_key",
+        "groupNames": ["CCC.ObjStor.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-objstor-cn04-blob-soft-delete-retention",
+        "policyDefinitionReferenceId": "storage_objstor_cn04_retention",
+        "groupNames": ["CCC.ObjStor.CN04"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-storage-account-objstor-cn05-blob-versioning-enabled",
+        "policyDefinitionReferenceId": "storage_objstor_cn05_versioning",
+        "groupNames": ["CCC.ObjStor.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-serverless-function-core-cn01-https-only",
+        "policyDefinitionReferenceId": "function_core_cn01_https",
+        "groupNames": ["CCC.Core.CN01"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-serverless-function-core-cn03-managed-identity",
+        "policyDefinitionReferenceId": "function_core_cn03_managed_identity",
+        "groupNames": ["CCC.Core.CN03"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-serverless-function-core-cn05-client-certificate",
+        "policyDefinitionReferenceId": "function_core_cn05_client_cert",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-serverless-function-svlscomp-cn01-no-public-network",
+        "policyDefinitionReferenceId": "function_svlscomp_cn01_private",
+        "groupNames": ["CCC.SvlsComp.CN01"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-log-analytics-workspace-core-cn05-no-public-network",
+        "policyDefinitionReferenceId": "law_core_cn05_network",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-log-analytics-workspace-core-cn09-retention",
+        "policyDefinitionReferenceId": "law_core_cn09_retention",
+        "groupNames": ["CCC.Core.CN09"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-key-vault-core-cn05-no-public-network",
+        "policyDefinitionReferenceId": "kv_core_cn05_network",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-key-vault-keymgmt-cn01-purge-protection",
+        "policyDefinitionReferenceId": "kv_keymgmt_cn01_purge_protection",
+        "groupNames": ["CCC.KeyMgmt.CN01"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-key-vault-keymgmt-cn02-rbac-authorization",
+        "policyDefinitionReferenceId": "kv_keymgmt_cn02_rbac",
+        "groupNames": ["CCC.KeyMgmt.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-key-vault-keymgmt-cn04-premium-sku",
+        "policyDefinitionReferenceId": "kv_keymgmt_cn04_premium",
+        "groupNames": ["CCC.KeyMgmt.CN04"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-virtual-machine-core-cn02-encryption-at-host",
+        "policyDefinitionReferenceId": "vm_core_cn02_encryption_at_host",
+        "groupNames": ["CCC.Core.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-virtual-machine-core-cn03-managed-identity",
+        "policyDefinitionReferenceId": "vm_core_cn03_managed_identity",
+        "groupNames": ["CCC.Core.CN03"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-virtual-machine-core-cn04-boot-diagnostics",
+        "policyDefinitionReferenceId": "vm_core_cn04_boot_diagnostics",
+        "groupNames": ["CCC.Core.CN04"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-virtual-machine-core-cn05-disable-password-auth",
+        "policyDefinitionReferenceId": "vm_core_cn05_password_auth",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-virtual-machine-core-cn05-trusted-launch",
+        "policyDefinitionReferenceId": "vm_core_cn05_trusted_launch",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c",
+        "policyDefinitionReferenceId": "governance_core_cn06_allowed_locations",
+        "groupNames": ["CCC.Core.CN06"],
+        "parameters": {
+          "listOfAllowedLocations": { "value": "[parameters('allowedLocations')]" },
+          "effect": { "value": "[parameters('allowedLocationsEffect')]" }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d8cf8476-a2ec-4916-896e-992351803c44",
+        "policyDefinitionReferenceId": "governance_core_cn11_key_rotation",
+        "groupNames": ["CCC.Core.CN11"],
+        "parameters": {
+          "maximumDaysToRotate": { "value": "[parameters('keyRotationMaximumDays')]" }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cf820ca0-f99e-4f3e-84fb-66e913812d21",
+        "policyDefinitionReferenceId": "governance_core_cn04_keyvault_resource_logs",
+        "groupNames": ["CCC.Core.CN04"],
+        "parameters": {
+          "requiredRetentionDays": { "value": "[parameters('logRetentionDays')]" }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/013e242c-8828-4970-87b3-ab247555486d",
+        "policyDefinitionReferenceId": "governance_core_cn14_vm_backup",
+        "groupNames": ["CCC.Core.CN14"]
+      }
+    ],
+    "policyDefinitionGroups": [
+      {
+        "name": "CCC.Core.CN01",
+        "displayName": "Core.CN01: Encrypt Data for Transmission",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.Core.CN02",
+        "displayName": "Core.CN02: Encrypt Data for Storage",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.Core.CN03",
+        "displayName": "Core.CN03: Implement Multi-Factor Authentication (MFA)",
+        "category": "Identity and Access Management"
+      },
+      {
+        "name": "CCC.Core.CN04",
+        "displayName": "Core.CN04: Log All Access and Changes",
+        "category": "Logging and Monitoring"
+      },
+      {
+        "name": "CCC.Core.CN05",
+        "displayName": "Core.CN05: Prevent Access from Untrusted Entities",
+        "category": "Networking"
+      },
+      {
+        "name": "CCC.Core.CN09",
+        "displayName": "Core.CN09: Ensure Integrity of Access Logs",
+        "category": "Logging and Monitoring"
+      },
+      {
+        "name": "CCC.ObjStor.CN02",
+        "displayName": "ObjStor.CN02: Prevent Anonymous or Public Access",
+        "category": "Identity and Access Management"
+      },
+      {
+        "name": "CCC.ObjStor.CN04",
+        "displayName": "ObjStor.CN04: Default Retention Policy",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.ObjStor.CN05",
+        "displayName": "ObjStor.CN05: Object Versioning Enabled",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.SvlsComp.CN01",
+        "displayName": "SvlsComp.CN01: Enforce Private Endpoints for Serverless Function",
+        "category": "Networking"
+      },
+      {
+        "name": "CCC.SvlsComp.CN02",
+        "displayName": "SvlsComp.CN02: Function Invocation Rate Limits (PLATFORM GAP)",
+        "description": "Per-caller invocation rate limiting is not expressible as an Azure Policy field. Enforce via Azure API Management rate-limit policies or Azure Front Door WAF. No member definition; documented for completeness.",
+        "category": "Networking"
+      },
+      {
+        "name": "CCC.KeyMgmt.CN01",
+        "displayName": "KeyMgmt.CN01: Protect Keys from Destruction (soft delete / purge protection)",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.KeyMgmt.CN02",
+        "displayName": "KeyMgmt.CN02: Limit Decrypt Permissions (RBAC)",
+        "category": "Identity and Access Management"
+      },
+      {
+        "name": "CCC.KeyMgmt.CN04",
+        "displayName": "KeyMgmt.CN04: Validate Imported Keys (HSM-backed)",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.Core.CN06",
+        "displayName": "Core.CN06: Restrict Deployments to Trust Perimeter",
+        "description": "Policy-only governance control (no AVM-configurable property): Azure built-in 'Allowed locations' restricts the regions resources may be deployed to.",
+        "category": "Networking"
+      },
+      {
+        "name": "CCC.Core.CN11",
+        "displayName": "Core.CN11: Protect Encryption Keys",
+        "description": "Policy-only governance control: Azure built-in audits that Key Vault keys have a rotation policy within the configured maximum age. AVM can set CMK but cannot enforce ongoing rotation cadence.",
+        "category": "Data"
+      },
+      {
+        "name": "CCC.Core.CN14",
+        "displayName": "Core.CN14: Maintain Recent Backups",
+        "description": "Policy-only governance control: Azure built-in audits that Azure Backup is enabled for virtual machines. The AVM VM module does not configure Recovery Services protection.",
+        "category": "Data"
+      }
+    ]
+  }
+}

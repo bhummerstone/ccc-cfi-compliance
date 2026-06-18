@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-serverless-function-core-cn03-managed-identity",
+  "properties": {
+    "displayName": "CCC.Core.CN03 - Function apps must use a managed identity",
+    "description": "Audits Azure Function apps that do not have a system-assigned (or user-assigned) managed identity, the identity principal used in place of stored credentials. Maps to FINOS CCC Core CN03 (Implement Multi-Factor Authentication / strong principal auth) and enforces the AVM serverless-function sample setting 'managed_identities.system_assigned = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.Core.CN03",
+      "ccc_title": "Implement Multi-Factor Authentication (MFA)",
+      "avm_sample": "serverless-function.tfvars",
+      "avm_module": "Azure/avm-res-web-site/azurerm",
+      "source": "azure-policy-ccc mapping ccc-svlscomp.yaml (CCC.SvlsComp.CN02 / managed identity)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "identity.type",
+                "exists": "false"
+              },
+              {
+                "field": "identity.type",
+                "notContains": "SystemAssigned"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

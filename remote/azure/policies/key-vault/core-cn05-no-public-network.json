@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-key-vault-core-cn05-no-public-network",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - Key vaults must disable public network access and default-deny",
+    "description": "Denies key vaults that leave public network access enabled or whose network ACLs do not default to Deny. Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM key-vault sample settings 'public_network_access_enabled = false' and 'network_acls.default_action = Deny'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "key-vault.tfvars",
+      "avm_module": "Azure/avm-res-keyvault-vault/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/publicNetworkAccess",
+                "notEquals": "Disabled"
+              },
+              {
+                "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

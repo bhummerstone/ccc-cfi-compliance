@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-serverless-function-core-cn05-client-certificate",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - Function apps must require incoming client certificates",
+    "description": "Audits Azure Function apps that do not require incoming client certificates (mutual TLS) for caller authentication. Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM serverless-function sample settings 'client_certificate_enabled = true' and 'client_certificate_mode = Required'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "serverless-function.tfvars",
+      "avm_module": "Azure/avm-res-web-site/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/clientCertEnabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/clientCertMode",
+                "notEquals": "Required"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-objstor-cn04-blob-soft-delete-retention",
+  "properties": {
+    "displayName": "CCC.ObjStor.CN04 - Storage accounts must enable blob and container soft-delete retention",
+    "description": "Audits storage accounts that do not have blob soft-delete retention enabled, supporting a default retention/recovery window for objects. Maps to FINOS CCC ObjStor CN04 (Default Retention Policy) and enforces the AVM storage-account sample 'blob_properties.delete_retention_policy' / 'container_delete_retention_policy'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.ObjStor.CN04",
+      "ccc_title": "Default Retention Policy",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc mapping ccc-objstor.yaml (CCC.ObjStor.CN04)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/blobServices"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/deleteRetentionPolicy.enabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/containerDeleteRetentionPolicy.enabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-core-cn05-network-default-deny",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - Storage accounts must disable public network access and default-deny",
+    "description": "Denies storage accounts that leave public network access enabled or whose network ACLs do not default to Deny. Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM storage-account sample settings 'public_network_access_enabled = false' and 'network_rules.default_action = Deny'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/publicNetworkAccess",
+                "notEquals": "Disabled"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

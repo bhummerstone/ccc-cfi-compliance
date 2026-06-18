@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-core-cn01-secure-transfer-tls",
+  "properties": {
+    "displayName": "CCC.Core.CN01 - Storage accounts must enforce HTTPS and a minimum TLS version",
+    "description": "Denies storage accounts that allow non-HTTPS traffic or a minimum TLS version below TLS 1.2. Maps to FINOS CCC Core CN01 (Encrypt Data for Transmission) and enforces the AVM storage-account sample settings 'https_traffic_only_enabled = true' and 'min_tls_version = TLS1_2'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.Core.CN01",
+      "ccc_title": "Encrypt Data for Transmission",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN01)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "minimumTlsVersion": {
+        "type": "String",
+        "defaultValue": "TLS1_2",
+        "allowedValues": ["TLS1_2", "TLS1_3"],
+        "metadata": {
+          "displayName": "Minimum TLS version",
+          "description": "The minimum acceptable TLS version for the storage account."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/minimumTlsVersion",
+                "notEquals": "[parameters('minimumTlsVersion')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

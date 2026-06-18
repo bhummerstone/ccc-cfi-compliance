@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-log-analytics-workspace-core-cn09-retention",
+  "properties": {
+    "displayName": "CCC.Core.CN09 - Log Analytics workspaces must retain logs for a minimum period",
+    "description": "Audits Log Analytics workspaces whose retention period is below the required minimum, supporting log integrity and availability for investigations. Maps to FINOS CCC Core CN09 (Ensure Integrity of Access Logs) and reflects the AVM log-analytics-workspace sample setting 'retention_in_days = 365'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring",
+      "ccc_control": "CCC.Core.CN09",
+      "ccc_title": "Ensure Integrity of Access Logs",
+      "avm_sample": "log-analytics-workspace.tfvars",
+      "avm_module": "Azure/avm-res-operationalinsights-workspace/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN04/CN09)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "minimumRetentionDays": {
+        "type": "Integer",
+        "defaultValue": 365,
+        "metadata": {
+          "displayName": "Minimum retention (days)",
+          "description": "The minimum acceptable Log Analytics workspace retention period in days."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.OperationalInsights/workspaces"
+          },
+          {
+            "field": "Microsoft.OperationalInsights/workspaces/retentionInDays",
+            "less": "[parameters('minimumRetentionDays')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

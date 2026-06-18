@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-key-vault-keymgmt-cn01-purge-protection",
+  "properties": {
+    "displayName": "CCC.KeyMgmt.CN01 - Key vaults must enable soft delete and purge protection",
+    "description": "Denies key vaults created without soft delete or purge protection, preventing irrecoverable deletion of keys and secrets (a preventive control for key destruction). Maps to FINOS CCC KeyMgmt CN01 (Alert on Key-version Changes) and enforces the AVM key-vault sample settings 'purge_protection_enabled = true' and 'soft_delete_retention_days = 90'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault",
+      "ccc_control": "CCC.KeyMgmt.CN01",
+      "ccc_title": "Alert on Key-version Changes",
+      "avm_sample": "key-vault.tfvars",
+      "avm_module": "Azure/avm-res-keyvault-vault/azurerm",
+      "source": "azure-policy-ccc mapping ccc-keymgmt.yaml (CCC.KeyMgmt.CN01)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/enableSoftDelete",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

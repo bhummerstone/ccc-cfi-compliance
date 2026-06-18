@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-key-vault-keymgmt-cn02-rbac-authorization",
+  "properties": {
+    "displayName": "CCC.KeyMgmt.CN02 - Key vaults must use Azure RBAC authorization",
+    "description": "Audits key vaults that still use legacy vault access policies instead of Azure RBAC, which is required for granular per-operation (e.g. decrypt) least-privilege scoping. Maps to FINOS CCC KeyMgmt CN02 (Limit Decrypt Permissions) and enforces the AVM key-vault sample setting 'legacy_access_policies_enabled = false' (RBAC authorization model).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault",
+      "ccc_control": "CCC.KeyMgmt.CN02",
+      "ccc_title": "Limit Decrypt Permissions",
+      "avm_sample": "key-vault.tfvars",
+      "avm_module": "Azure/avm-res-keyvault-vault/azurerm",
+      "source": "azure-policy-ccc mapping ccc-keymgmt.yaml (CCC.KeyMgmt.CN02)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/enableRbacAuthorization",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

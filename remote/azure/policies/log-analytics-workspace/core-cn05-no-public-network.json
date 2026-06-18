@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-log-analytics-workspace-core-cn05-no-public-network",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - Log Analytics workspaces must disable public ingestion and query",
+    "description": "Audits Log Analytics workspaces that allow public internet ingestion or query, which should instead use an Azure Monitor Private Link Scope (AMPLS). Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM log-analytics-workspace sample settings 'internet_ingestion_enabled = false' and 'internet_query_enabled = false'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "log-analytics-workspace.tfvars",
+      "avm_module": "Azure/avm-res-operationalinsights-workspace/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.OperationalInsights/workspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForIngestion",
+                "notEquals": "Disabled"
+              },
+              {
+                "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForQuery",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

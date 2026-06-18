@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-core-cn02-infrastructure-encryption",
+  "properties": {
+    "displayName": "CCC.Core.CN02 - Storage accounts must enable infrastructure (double) encryption",
+    "description": "Audits storage accounts that do not have infrastructure encryption enabled, which adds a second layer of platform-managed encryption at rest. Maps to FINOS CCC Core CN02 (Encrypt Data for Storage) and enforces the AVM storage-account sample setting 'infrastructure_encryption_enabled = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.Core.CN02",
+      "ccc_title": "Encrypt Data for Storage",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN02)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/encryption.requireInfrastructureEncryption",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

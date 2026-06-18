@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-serverless-function-svlscomp-cn01-no-public-network",
+  "properties": {
+    "displayName": "CCC.SvlsComp.CN01 - Function apps must disable public network access",
+    "description": "Denies Azure Function apps that leave public network access enabled, requiring access via private endpoints. Maps to FINOS CCC SvlsComp CN01 (Enforce Use of Private Endpoints for Serverless Function) and enforces the AVM serverless-function sample setting 'public_network_access_enabled = false'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute",
+      "ccc_control": "CCC.SvlsComp.CN01",
+      "ccc_title": "Enforce Use of Private Endpoints for Serverless Function",
+      "avm_sample": "serverless-function.tfvars",
+      "avm_module": "Azure/avm-res-web-site/azurerm",
+      "source": "azure-policy-ccc mapping custom/compute/cn01-function-private-endpoint-only"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "Microsoft.Web/sites/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

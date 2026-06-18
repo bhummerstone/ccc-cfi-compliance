@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-storage-account-objstor-cn02-disable-shared-key",
+  "properties": {
+    "displayName": "CCC.ObjStor.CN02 - Storage accounts must disable shared key access",
+    "description": "Audits storage accounts that still allow account-key (shared key) authorization instead of Entra ID identity-based access. Maps to FINOS CCC ObjStor CN02 (Prevent Anonymous or Public Access to Buckets and Objects) and enforces the AVM storage-account sample settings 'shared_access_key_enabled = false' and 'default_to_oauth_authentication = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage",
+      "ccc_control": "CCC.ObjStor.CN02",
+      "ccc_title": "Prevent Anonymous or Public Access to Buckets and Objects",
+      "avm_sample": "storage-account.tfvars",
+      "avm_module": "Azure/avm-res-storage-storageaccount/azurerm",
+      "source": "azure-policy-ccc mapping ccc-objstor.yaml (CCC.ObjStor.CN02)"
+    },
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/allowSharedKeyAccess",
+            "notEquals": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}
