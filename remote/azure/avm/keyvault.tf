@@ -22,6 +22,17 @@ module "key_vault" {
   sku_name                        = var.sku_name
   soft_delete_retention_days      = var.soft_delete_retention_days
 
+  # Resource logs (AuditEvent + AllMetrics) to the Log Analytics workspace,
+  # satisfying CCC.Core.CN04 (resource logs in Key Vault should be enabled).
+  diagnostic_settings = {
+    to_law = {
+      name                  = "diag-${local.key_vault_name}"
+      log_groups            = ["allLogs"]
+      metric_categories     = ["AllMetrics"]
+      workspace_resource_id = module.log_analytics_workspace.resource_id
+    }
+  }
+
   # Vault private endpoint into the pe subnet, resolved via private DNS.
   private_endpoints = {
     vault = {
