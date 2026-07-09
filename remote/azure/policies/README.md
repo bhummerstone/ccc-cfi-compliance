@@ -31,6 +31,7 @@ policies/
 ├── log-analytics-workspace/  # avm-res-operationalinsights-workspace (CCC.Core)
 ├── key-vault/                # avm-res-keyvault-vault          (CCC.KeyMgmt + Core)
 ├── virtual-machine/          # avm-res-compute-virtualmachine  (CCC.Core)
+├── aks/                      # avm-res-containerservice-managedcluster (CCC.Core)
 └── initiatives/
     └── ccc-avm-initiative.json   # bundles all definitions, grouped by CCC control
 ```
@@ -40,16 +41,17 @@ JSON files remain the source of truth.
 
 ## Coverage by service
 
-Each row is one policy definition. `effect` is the parameterised default (start with
-`Audit`, switch guardrails to `Deny` once impact is measured).
+Each row is one policy definition. `effect` is the parameterised default. **All
+definitions currently default to `Audit`** (report-only); raise an individual guardrail to
+`Deny` by changing its `effect` `defaultValue` in the JSON once impact is measured.
 
 ### storage-account (`storage-account.tfvars`)
 | CCC control | Policy | Effect |
 |---|---|---|
-| CCC.Core.CN01 | `core-cn01-secure-transfer-tls.json` | Deny |
+| CCC.Core.CN01 | `core-cn01-secure-transfer-tls.json` | Audit |
 | CCC.Core.CN02 | `core-cn02-infrastructure-encryption.json` | Audit |
-| CCC.Core.CN05 | `core-cn05-network-default-deny.json` | Deny |
-| CCC.ObjStor.CN02 | `objstor-cn02-no-public-blob-access.json` | Deny |
+| CCC.Core.CN05 | `core-cn05-network-default-deny.json` | Audit |
+| CCC.ObjStor.CN02 | `objstor-cn02-no-public-blob-access.json` | Audit |
 | CCC.ObjStor.CN02 | `objstor-cn02-disable-shared-key.json` | Audit |
 | CCC.ObjStor.CN04 | `objstor-cn04-blob-soft-delete-retention.json` | Audit |
 | CCC.ObjStor.CN05 | `objstor-cn05-blob-versioning.json` | Audit |
@@ -57,10 +59,10 @@ Each row is one policy definition. `effect` is the parameterised default (start 
 ### serverless-function (`serverless-function.tfvars`)
 | CCC control | Policy | Effect |
 |---|---|---|
-| CCC.Core.CN01 | `core-cn01-https-only.json` | Deny |
+| CCC.Core.CN01 | `core-cn01-https-only.json` | Audit |
 | CCC.Core.CN03 | `core-cn03-managed-identity.json` | Audit |
 | CCC.Core.CN05 | `core-cn05-client-certificate.json` | Audit |
-| CCC.SvlsComp.CN01 | `svlscomp-cn01-no-public-network.json` | Deny |
+| CCC.SvlsComp.CN01 | `svlscomp-cn01-no-public-network.json` | Audit |
 | CCC.SvlsComp.CN02 | _gap — rate limiting not expressible as a Policy field_ | — |
 
 ### log-analytics-workspace (`log-analytics-workspace.tfvars`)
@@ -72,8 +74,8 @@ Each row is one policy definition. `effect` is the parameterised default (start 
 ### key-vault (`key-vault.tfvars`)
 | CCC control | Policy | Effect |
 |---|---|---|
-| CCC.Core.CN05 | `core-cn05-no-public-network.json` | Deny |
-| CCC.KeyMgmt.CN01 | `keymgmt-cn01-purge-protection.json` | Deny |
+| CCC.Core.CN05 | `core-cn05-no-public-network.json` | Audit |
+| CCC.KeyMgmt.CN01 | `keymgmt-cn01-purge-protection.json` | Audit |
 | CCC.KeyMgmt.CN02 | `keymgmt-cn02-rbac-authorization.json` | Audit |
 | CCC.KeyMgmt.CN04 | `keymgmt-cn04-premium-sku.json` | Audit |
 
@@ -85,6 +87,18 @@ Each row is one policy definition. `effect` is the parameterised default (start 
 | CCC.Core.CN04 | `core-cn04-boot-diagnostics.json` | Audit |
 | CCC.Core.CN05 | `core-cn05-disable-password-auth.json` | Audit |
 | CCC.Core.CN05 | `core-cn05-trusted-launch.json` | Audit |
+
+### aks (`aks.tfvars`)
+Guardrails for the AKS Automatic cluster in [`remote/azure/avm`](../avm/aks.tf).
+Field aliases validated against `Microsoft.ContainerService/managedClusters`.
+| CCC control | Policy | Effect |
+|---|---|---|
+| CCC.Core.CN02 | `core-cn02-disk-encryption-set.json` | Audit |
+| CCC.Core.CN03 | `core-cn03-managed-aad-azure-rbac.json` | Audit |
+| CCC.Core.CN03 | `core-cn03-disable-local-accounts.json` | Audit |
+| CCC.Core.CN05 | `core-cn05-private-cluster.json` | Audit |
+| CCC.Core.CN05 | `core-cn05-azure-policy-addon.json` | Audit |
+| CCC.Core.CN11 | `core-cn11-kms-etcd-encryption.json` | Audit |
 
 ### Known gaps (no Azure Policy field)
 | CCC control | Why | Compensating control |
@@ -166,9 +180,9 @@ Key variables (see `variables.tf`):
 
 > **Audit-first roll-out:** start with `enforcement_mode = "DoNotEnforce"` to evaluate
 > compliance without blocking deployments, then switch to `Default` once impact is
-> understood. Per-definition `effect` defaults still apply (Deny for clear-cut preventable
-> misconfigurations, Audit otherwise); change a definition's `effect` `defaultValue` in its
-> JSON to soften an individual guardrail.
+> understood. Every definition's `effect` currently defaults to `Audit`; raise an
+> individual guardrail to `Deny` by changing its `effect` `defaultValue` in its JSON once
+> impact is understood.
 
 ## Deploy with Azure CLI (alternative)
 
@@ -178,7 +192,7 @@ Definitions first, then the initiative, then assign:
 SCOPE="/subscriptions/<subscription-id>"   # or a management group path
 
 # 1. Create every definition
-Get-ChildItem -Recurse -Filter *.json -Path storage-account,serverless-function,log-analytics-workspace,key-vault,virtual-machine |
+Get-ChildItem -Recurse -Filter *.json -Path storage-account,serverless-function,log-analytics-workspace,key-vault,virtual-machine,aks |
   ForEach-Object {
     $d = Get-Content $_.FullName -Raw | ConvertFrom-Json
     az policy definition create `

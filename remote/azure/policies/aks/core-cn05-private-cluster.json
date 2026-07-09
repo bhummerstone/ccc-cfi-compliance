@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-aks-core-cn05-private-cluster",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - AKS clusters must be private (API server not publicly reachable)",
+    "description": "Denies AKS managed clusters that do not enable a private API server. A private cluster keeps the API server reachable only from within the trust perimeter (API Server VNet Integration / private link). Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM aks sample setting 'api_server_access_profile.enable_private_cluster = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "aks.tfvars",
+      "avm_module": "Azure/avm-res-containerservice-managedcluster/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/apiServerAccessProfile.enablePrivateCluster",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

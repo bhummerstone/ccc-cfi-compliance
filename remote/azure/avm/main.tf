@@ -7,6 +7,7 @@ locals {
   function_plan_name   = "avmplan${var.instance_id}"
   function_app_name    = "avmfunc${var.instance_id}"
   virtual_machine_name = "avmvm${var.instance_id}"
+  aks_cluster_name     = "avmaks${var.instance_id}"
 }
 
 data "azurerm_client_config" "current" {}
@@ -15,6 +16,6 @@ data "azurerm_client_config" "current" {}
 # Managed as a resource to allow creation, but we import it if it already exists
 # because it is excluded from the automated cleanup (nuke).
 resource "azurerm_resource_group" "this" {
-  name     = "avm-testing"
+  name     = var.resource_group_name
   location = var.location
 }

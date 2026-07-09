@@ -10,6 +10,12 @@ variable "location" {
   default     = "westus2"
 }
 
+variable "resource_group_name" {
+  description = "Name of the resource group to create and deploy the AVM test resources into."
+  type        = string
+  default     = "avm-testing"
+}
+
 variable "subscription_id" {
   description = "Azure subscription ID (optional if using az cli or ARM_SUBSCRIPTION_ID)"
   type        = string
@@ -336,5 +342,21 @@ variable "vm_zone" {
 
 variable "vm_sku_size" {
   type    = string
-  default = "Standard_D2ds_v5"
+  default = "Standard_D2ds_v6"
+}
+
+# ---------------------------------------------------------------------------
+# AKS Automatic managed cluster (avm-res-containerservice-managedcluster) —
+# see remote/azure/avm/aks.tfvars for the control-informed values and CCC
+# annotations. Node-level sizing/zones are managed by AKS Node
+# Auto-Provisioning on the Automatic SKU and are therefore not exposed here.
+# ---------------------------------------------------------------------------
+variable "aks_admin_group_object_ids" {
+  description = <<-DESC
+    Microsoft Entra ID group object IDs granted cluster-admin via Azure RBAC.
+    Local accounts are disabled, so at least one group is required to administer
+    the cluster (CCC.Core.CN03 / CCC.Core.CN05).
+  DESC
+  type        = list(string)
+  default     = []
 }

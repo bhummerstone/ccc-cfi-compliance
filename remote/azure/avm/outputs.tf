@@ -57,3 +57,12 @@ output "virtual_machine" {
     resource_id = nonsensitive(module.virtual_machine.resource_id)
   }
 }
+
+output "aks" {
+  description = "Deployed AKS Automatic cluster details."
+  value = {
+    name            = module.aks.name
+    resource_id     = module.aks.resource_id
+    oidc_issuer_url = module.aks.oidc_issuer_profile_issuer_url
+  }
+}

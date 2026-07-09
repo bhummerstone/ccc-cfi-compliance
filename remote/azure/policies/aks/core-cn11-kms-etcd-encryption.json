@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-aks-core-cn11-kms-etcd-encryption",
+  "properties": {
+    "displayName": "CCC.Core.CN11 - AKS clusters must encrypt etcd secrets with a customer-managed key in a private key vault (KMS)",
+    "description": "Audits AKS managed clusters that do not enable the Azure Key Vault KMS provider with a private key vault. KMS encrypts Kubernetes secrets in etcd with a customer-managed key (CMEK); requiring keyVaultNetworkAccess = Private keeps the key vault off the public internet (reached via the trusted-services bypass). Maps to FINOS CCC Core CN11 (Protect Encryption Keys) and enforces the AVM aks sample setting 'security_profile.azure_key_vault_kms' with key_vault_network_access = Private.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes",
+      "ccc_control": "CCC.Core.CN11",
+      "ccc_title": "Protect Encryption Keys",
+      "avm_sample": "aks.tfvars",
+      "avm_module": "Azure/avm-res-containerservice-managedcluster/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN11)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerService/managedClusters/securityProfile.azureKeyVaultKms.enabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/securityProfile.azureKeyVaultKms.keyVaultNetworkAccess",
+                "notEquals": "Private"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

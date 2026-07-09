@@ -14,7 +14,7 @@ resource "azurerm_user_assigned_identity" "function" {
 
 resource "azurerm_role_assignment" "function_blob" {
   scope                = module.storage_account.resource_id
-  role_definition_name = "Storage Blob Data Owner"
+  role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.function.principal_id
 }
 
@@ -64,6 +64,21 @@ module "serverless_function" {
   storage_container_endpoint        = "https://${local.storage_account_name}.blob.core.windows.net/deploymentpackage"
   storage_authentication_type       = "UserAssignedIdentity"
   storage_user_assigned_identity_id = azurerm_user_assigned_identity.function.id
+
+  # Function app resource logs (FunctionAppLogs) + metrics to the central Log
+  # Analytics workspace, satisfying CCC.Core.CN04 (log all access and changes).
+  diagnostic_settings = {
+    to_law = {
+      name                  = "diag-${local.function_app_name}"
+      workspace_resource_id = module.log_analytics_workspace.resource_id
+      logs = [
+        { category_group = "allLogs" }
+      ]
+      metrics = [
+        { category = "AllMetrics" }
+      ]
+    }
+  }
 
   # Inbound private endpoint for the function app, resolved via private DNS.
   private_endpoints = {

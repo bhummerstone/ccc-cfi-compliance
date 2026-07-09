@@ -81,6 +81,22 @@ module "storage_account" {
     }
   }
 
+  # Resource logs (blob data-plane read/write/delete) + Transaction metrics to
+  # the central Log Analytics workspace, satisfying CCC.Core.CN04 (log all
+  # access and changes) for object data.
+  diagnostic_settings_blob = {
+    to_law = {
+      name                  = "diag-${local.storage_account_name}-blob"
+      workspace_resource_id = module.log_analytics_workspace.resource_id
+      logs = [
+        { category_group = "allLogs" }
+      ]
+      metrics = [
+        { category = "Transaction" }
+      ]
+    }
+  }
+
   # Blob + file private endpoints into the pe subnet, resolved via private DNS.
   private_endpoints = {
     blob = {

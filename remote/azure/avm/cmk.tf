@@ -24,6 +24,24 @@ resource "azapi_resource" "cmk_storage_key" {
       kty     = "RSA"
       keySize = 4096
       keyOps  = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+      # CCC.Core.CN11 / CCC.KeyMgmt: rotate the key within 90 days of issuance
+      # (rotates at day 60, expires at day 90) so it satisfies the CN11
+      # "keys should have a rotation policy" governance audit.
+      rotationPolicy = {
+        attributes = {
+          expiryTime = "P90D"
+        }
+        lifetimeActions = [
+          {
+            action  = { type = "rotate" }
+            trigger = { timeAfterCreate = "P60D" }
+          },
+          {
+            action  = { type = "notify" }
+            trigger = { timeBeforeExpiry = "P30D" }
+          }
+        ]
+      }
     }
   }
 }
@@ -37,9 +55,58 @@ resource "azapi_resource" "cmk_disk_key" {
       kty     = "RSA"
       keySize = 4096
       keyOps  = ["decrypt", "encrypt", "sign", "unwrapKey", "verify", "wrapKey"]
+      # CCC.Core.CN11: rotate within 90 days of issuance (see cmk-storage).
+      rotationPolicy = {
+        attributes = {
+          expiryTime = "P90D"
+        }
+        lifetimeActions = [
+          {
+            action  = { type = "rotate" }
+            trigger = { timeAfterCreate = "P60D" }
+          },
+          {
+            action  = { type = "notify" }
+            trigger = { timeBeforeExpiry = "P30D" }
+          }
+        ]
+      }
     }
   }
   response_export_values = ["properties.keyUriWithVersion"]
+}
+
+# CMK for AKS KMS etcd encryption of Kubernetes secrets (CCC.Core.CN02,
+# CCC.Core.CN11). The new AKS KMS experience auto-rotates when given the
+# VERSIONLESS key URI (properties.keyUri), so both forms are exported.
+resource "azapi_resource" "cmk_aks_key" {
+  type      = "Microsoft.KeyVault/vaults/keys@2023-07-01"
+  name      = "cmk-aks"
+  parent_id = module.key_vault.resource_id
+  body = {
+    properties = {
+      kty     = "RSA"
+      keySize = 4096
+      keyOps  = ["decrypt", "encrypt", "unwrapKey", "wrapKey"]
+      # CCC.Core.CN11: rotate within 90 days of issuance (see cmk-storage).
+      rotationPolicy = {
+        attributes = {
+          expiryTime = "P90D"
+        }
+        lifetimeActions = [
+          {
+            action  = { type = "rotate" }
+            trigger = { timeAfterCreate = "P60D" }
+          },
+          {
+            action  = { type = "notify" }
+            trigger = { timeBeforeExpiry = "P30D" }
+          }
+        ]
+      }
+    }
+  }
+  response_export_values = ["properties.keyUri", "properties.keyUriWithVersion"]
 }
 
 # The storage CMK identity may wrap/unwrap the encryption key.

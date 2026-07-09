@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-aks-core-cn03-disable-local-accounts",
+  "properties": {
+    "displayName": "CCC.Core.CN03 - AKS clusters must disable local accounts",
+    "description": "Audits AKS managed clusters that do not disable local (static kubeconfig) accounts. Disabling local accounts forces all access through Microsoft Entra ID, where MFA / Conditional Access is enforced, instead of long-lived static credentials. Maps to FINOS CCC Core CN03 (Implement Multi-Factor Authentication) and enforces the AVM aks sample setting 'disable_local_accounts = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes",
+      "ccc_control": "CCC.Core.CN03",
+      "ccc_title": "Implement Multi-Factor Authentication (MFA)",
+      "avm_sample": "aks.tfvars",
+      "avm_module": "Azure/avm-res-containerservice-managedcluster/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN03)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/disableLocalAccounts",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

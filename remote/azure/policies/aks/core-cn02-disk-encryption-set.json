@@ -1,0 +1,54 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-aks-core-cn02-disk-encryption-set",
+  "properties": {
+    "displayName": "CCC.Core.CN02 - AKS clusters must encrypt node disks with a customer-managed key (disk encryption set)",
+    "description": "Audits AKS managed clusters that are not associated with a disk encryption set, which provides customer-managed-key (CMEK) encryption at rest for node OS and data disks. Maps to FINOS CCC Core CN02 (Encrypt Data for Storage) and enforces the AVM aks sample setting 'disk_encryption_set_id'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes",
+      "ccc_control": "CCC.Core.CN02",
+      "ccc_title": "Encrypt Data for Storage",
+      "avm_sample": "aks.tfvars",
+      "avm_module": "Azure/avm-res-containerservice-managedcluster/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN02)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerService/managedClusters/diskEncryptionSetID",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/diskEncryptionSetID",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

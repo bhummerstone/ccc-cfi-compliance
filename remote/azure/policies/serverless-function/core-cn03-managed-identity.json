@@ -11,7 +11,7 @@
       "ccc_title": "Implement Multi-Factor Authentication (MFA)",
       "avm_sample": "serverless-function.tfvars",
       "avm_module": "Azure/avm-res-web-site/azurerm",
-      "source": "azure-policy-ccc mapping ccc-svlscomp.yaml (CCC.SvlsComp.CN02 / managed identity)"
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN03)"
     },
     "mode": "All",
     "parameters": {

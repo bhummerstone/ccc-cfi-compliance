@@ -30,20 +30,16 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Storage/storageAccounts"
-          },
-          {
-            "field": "kind",
-            "in": ["StorageV2", "BlobStorage", "BlockBlobStorage"]
+            "equals": "Microsoft.Storage/storageAccounts/blobServices"
           },
           {
             "anyOf": [
               {
-                "field": "Microsoft.Storage/storageAccounts/blobServices/default.isVersioningEnabled",
+                "field": "Microsoft.Storage/storageAccounts/blobServices/isVersioningEnabled",
                 "exists": "false"
               },
               {
-                "field": "Microsoft.Storage/storageAccounts/blobServices/default.isVersioningEnabled",
+                "field": "Microsoft.Storage/storageAccounts/blobServices/isVersioningEnabled",
                 "equals": "false"
               }
             ]

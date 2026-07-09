@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2020-10-01/policyDefinitionRules/Microsoft.Authorization.json",
+  "name": "ccc-avm-aks-core-cn05-azure-policy-addon",
+  "properties": {
+    "displayName": "CCC.Core.CN05 - AKS clusters must enable the Azure Policy add-on",
+    "description": "Audits AKS managed clusters that do not enable the Azure Policy add-on, which backs Deployment Safeguards and admission-time Gatekeeper guardrails. Maps to FINOS CCC Core CN05 (Prevent Access from Untrusted Entities) and enforces the AVM aks sample setting 'addon_profile_azure_policy.enabled = true'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes",
+      "ccc_control": "CCC.Core.CN05",
+      "ccc_title": "Prevent Access from Untrusted Entities",
+      "avm_sample": "aks.tfvars",
+      "avm_module": "Azure/avm-res-containerservice-managedcluster/azurerm",
+      "source": "azure-policy-ccc mapping ccc-core.yaml (CCC.Core.CN05)"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": ["Audit", "Deny", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/addonProfiles.azurePolicy.enabled",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}

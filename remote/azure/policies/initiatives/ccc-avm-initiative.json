@@ -159,6 +159,36 @@
         "groupNames": ["CCC.Core.CN05"]
       },
       {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn03-managed-aad-azure-rbac",
+        "policyDefinitionReferenceId": "aks_core_cn03_managed_aad_rbac",
+        "groupNames": ["CCC.Core.CN03"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn03-disable-local-accounts",
+        "policyDefinitionReferenceId": "aks_core_cn03_disable_local_accounts",
+        "groupNames": ["CCC.Core.CN03"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn05-private-cluster",
+        "policyDefinitionReferenceId": "aks_core_cn05_private_cluster",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn05-azure-policy-addon",
+        "policyDefinitionReferenceId": "aks_core_cn05_azure_policy_addon",
+        "groupNames": ["CCC.Core.CN05"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn02-disk-encryption-set",
+        "policyDefinitionReferenceId": "aks_core_cn02_disk_encryption_set",
+        "groupNames": ["CCC.Core.CN02"]
+      },
+      {
+        "policyDefinitionId": "{scope}/providers/Microsoft.Authorization/policyDefinitions/ccc-avm-aks-core-cn11-kms-etcd-encryption",
+        "policyDefinitionReferenceId": "aks_core_cn11_kms_etcd",
+        "groupNames": ["CCC.Core.CN11"]
+      },
+      {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c",
         "policyDefinitionReferenceId": "governance_core_cn06_allowed_locations",
         "groupNames": ["CCC.Core.CN06"],
